@@ -547,16 +547,21 @@ html[data-contrast="high"] .section--band::before { display: none; }
 /* The source is 3:2 and the slot is square, so cover trims the sides. The 52%
    focal point keeps his face centred in what remains. Re-check that figure if
    the hero photograph is ever replaced. */
-/* The hero photograph is bare now: rounded corners and the drop shadow, no mat
-   and no keyline. It carried a 4px --ink keyline outside a 10px cyan mat until
-   21 Sep 2026, when the campaign removed first one and then the other. With no
-   mat there is nothing to subtract, so the picture takes --r-photo directly and
-   its corners are the frame's corners. */
+/* A cyan mat and a drop shadow. The mat is where his colour lands on the
+   photograph - a field of it rather than a line. The 4px --ink keyline that
+   used to sit outside it was removed on 21 Sep 2026; the mat was taken off in
+   the same pass and put straight back, so keyline gone, mat staying.
+   Concentric corners: the inner radius is the outer one minus the 10px mat. */
 .photo-frame {
+  background: var(--cyan);
+  padding: 10px;
   border-radius: var(--r-photo);
   box-shadow: var(--shadow-photo);
 }
-.photo-frame img { display: block; width: 100%; height: auto; border-radius: var(--r-photo); }
+.photo-frame img {
+  display: block; width: 100%; height: auto;
+  border-radius: calc(var(--r-photo) - 10px);
+}
 /* The strip photographs open larger. The link is a real href to the bigger
    file, so with scripting off a click still gets you the picture; the script
    upgrades it to a dialog. */
