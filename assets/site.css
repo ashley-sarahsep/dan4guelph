@@ -517,7 +517,17 @@ html[data-contrast="high"] .section--band::before { display: none; }
   align-items: center;
 }
 .hero-copy { display: flex; flex-direction: column; gap: 22px; align-items: flex-start; }
-.hero-name { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; }
+.hero-name {
+  font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em;
+  /* A light lift off the white panel, not a heavy one - the campaign compared
+     three and chose the softest. Kept well under the photograph's shadow so his
+     name does not compete with it. */
+  text-shadow: 0 2px 4px rgba(7, 31, 39, 0.16);
+}
+/* Off under high contrast. That mode exists to flatten everything to one clean
+   pairing, and a blur softens the edge of the glyph - the opposite of what a
+   reader who turned it on is asking for. */
+html[data-contrast="high"] .hero-name { text-shadow: none; }
 .hero-role { font-size: clamp(1.1875rem, 2.4vw, 1.5rem); font-weight: 600; color: var(--ink); max-width: 22em; }
 .hero-tag  { font-size: clamp(1.0625rem, 2vw, 1.1875rem); color: var(--muted); max-width: 26em; }
 /* The tagline arrives as a short line and a sentence under it, so the first
