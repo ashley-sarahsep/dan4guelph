@@ -118,7 +118,6 @@ html[data-contrast="high"] {
 }
 html[data-contrast="high"] .section--dark,
 html[data-contrast="high"] .site-footer { background: #000000 !important; }
-html[data-contrast="high"] .photo-ph { background-image: none !important; }
 html[data-contrast="high"] a { text-decoration-thickness: 3px; }
 
 /* Enhanced focus: show the ring for mouse users too, and thicken it. */
@@ -517,21 +516,11 @@ html[data-contrast="high"] .section--band::before { display: none; }
   align-items: center;
 }
 .hero-copy { display: flex; flex-direction: column; gap: 22px; align-items: flex-start; }
-.hero-name {
-  font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em;
-  /* Two layers, the same idea as --shadow-photo: a tight contact shadow to
-     seat the letters on the panel, and a wider soft one to lift them off it.
-     A single blur at this strength smears; splitting it keeps the glyph edges
-     crisp while the shadow reads as deep. The campaign compared four weights
-     and chose this one. */
-  text-shadow:
-    0 2px 3px rgba(7, 31, 39, 0.26),
-    0 7px 16px rgba(7, 31, 39, 0.34);
-}
-/* Off under high contrast. That mode exists to flatten everything to one clean
-   pairing, and a blur softens the edge of the glyph - the opposite of what a
-   reader who turned it on is asking for. */
-html[data-contrast="high"] .hero-name { text-shadow: none; }
+/* Flat, and deliberately so. A light shadow and then a deeper two-layer one
+   were both tried on 21 Sep 2026 and both rejected: at this size the cyan
+   holds the panel on its own, and any shadow softened the letterforms. Do not
+   add one back. */
+.hero-name { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; }
 .hero-role { font-size: clamp(1.1875rem, 2.4vw, 1.5rem); font-weight: 600; color: var(--ink); max-width: 22em; }
 .hero-tag  { font-size: clamp(1.0625rem, 2vw, 1.1875rem); color: var(--muted); max-width: 26em; }
 /* The tagline arrives as a short line and a sentence under it, so the first
@@ -558,35 +547,20 @@ html[data-contrast="high"] .hero-name { text-shadow: none; }
 /* The source is 3:2 and the slot is square, so cover trims the sides. The 52%
    focal point keeps his face centred in what remains. Re-check that figure if
    the hero photograph is ever replaced. */
-/* The frame is a cyan mat with an ink keyline and a drop shadow. The mat is
-   where his colour actually lands on the page — a field of it rather than a
-   line of it. It wraps whatever goes in the slot; .photo-frame--empty switches
-   it off while a placeholder is sitting there, so landing a real photo means
-   deleting one class rather than restyling anything. */
+/* The hero photograph is bare now: rounded corners and the drop shadow, no mat
+   and no keyline. It carried a 4px --ink keyline outside a 10px cyan mat until
+   21 Sep 2026, when the campaign removed first one and then the other. With no
+   mat there is nothing to subtract, so the picture takes --r-photo directly and
+   its corners are the frame's corners. */
 .photo-frame {
-  background: var(--cyan);
-  padding: 10px;
   border-radius: var(--r-photo);
   box-shadow: var(--shadow-photo);
 }
-.photo-frame--empty {
-  background: none;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-/* Concentric corners: the inner radius is the outer one minus the mat. The mat
-   was 10px of cyan inside a 4px ink keyline until 21 Sep 2026; with the keyline
-   gone the frame's own edge is the mat's edge, so the subtraction is just the
-   padding. */
-.photo-frame img,
-.photo-frame > .photo-ph { border-radius: calc(var(--r-photo) - 10px); }
-.photo-frame img { display: block; width: 100%; height: auto; }
+.photo-frame img { display: block; width: 100%; height: auto; border-radius: var(--r-photo); }
 /* The strip photographs open larger. The link is a real href to the bigger
    file, so with scripting off a click still gets you the picture; the script
    upgrades it to a dialog. */
-.photo-zoom { display: block; cursor: zoom-in; border-radius: calc(var(--r-photo) - 10px); }
+.photo-zoom { display: block; cursor: zoom-in; border-radius: calc(var(--r-photo) - var(--edge)); }
 .photo-zoom img { transition: filter 150ms; }
 .photo-zoom:hover img { filter: brightness(1.06); }
 
@@ -611,24 +585,8 @@ html[data-contrast="high"] .hero-name { text-shadow: none; }
   background: var(--white);
 }
 
-/* --- Photo placeholders -------------------------------------------------- */
+/* --- Photo slots -------------------------------------------------------- */
 .photo-slot { display: flex; flex-direction: column; gap: 10px; }
-.photo-ph {
-  border-radius: var(--r-photo);
-  border: var(--bw) dashed var(--cyan);
-  background-color: var(--white);
-  background-image: repeating-linear-gradient(135deg, rgba(20,153,184,0.14) 0 12px, rgba(44,181,181,0) 12px 24px);
-  display: grid; place-items: center; padding: 24px; text-align: center;
-}
-.photo-ph--square { aspect-ratio: 1 / 1; background-color: var(--page); }
-.photo-ph__label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.8125rem; color: var(--ink); background: var(--white);
-  border: 1px solid var(--hairline); border-radius: var(--r-card);
-  padding: 10px 14px; max-width: 24em;
-}
-.photo-note { font-size: 0.8125rem; color: var(--muted-2); }
-.photo-note code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95em; }
 
 /* --- About --------------------------------------------------------------- */
 
@@ -678,8 +636,6 @@ html[data-contrast="high"] .hero-name { text-shadow: none; }
    rather than deleting the rule, because .photo-frame's own shadow - sized for
    the 600px hero - would otherwise come through. */
 .photo-strip .photo-frame { box-shadow: none; }
-.photo-strip .photo-ph { padding: 12px; }
-.photo-strip .photo-ph__label { font-size: 0.6875rem; padding: 7px 9px; }
 .photo-cap { font-size: 0.9375rem; color: var(--muted); text-align: center; }
 
 /* --- The role ------------------------------------------------------------ */
