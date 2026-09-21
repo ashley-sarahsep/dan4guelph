@@ -49,12 +49,6 @@
     0 6px 12px rgba(7, 31, 39, 0.28),
     0 22px 40px rgba(7, 31, 39, 0.38),
     0 54px 90px rgba(7, 31, 39, 0.40);
-  /* Scaled down for the strip thumbnails: the full shadow is sized for a
-     600px hero photo and swamps a 250px one. */
-  --shadow-photo-sm:
-    0 3px 6px rgba(7, 31, 39, 0.24),
-    0 10px 18px rgba(7, 31, 39, 0.30),
-    0 22px 38px rgba(7, 31, 39, 0.32);
   --shadow-cta:  0 3px 0 var(--crimson-sh);
 
   --wrap: 1120px;
@@ -642,10 +636,14 @@ html[data-contrast="high"] .section--band::before { display: none; }
   border: var(--edge) solid var(--cyan);
 }
 .photo-strip .photo-frame img { border-radius: calc(var(--r-photo) - var(--edge)); }
-.photo-strip .photo-frame:not(.photo-frame--empty) { box-shadow: var(--shadow-photo-sm); }
+/* No drop shadow here. The three pictures carry their own white mat now, and a
+   shadow under a matted picture reads as a second frame. Setting it to none
+   rather than deleting the rule, because .photo-frame's own shadow - sized for
+   the 600px hero - would otherwise come through. */
+.photo-strip .photo-frame { box-shadow: none; }
 .photo-strip .photo-ph { padding: 12px; }
 .photo-strip .photo-ph__label { font-size: 0.6875rem; padding: 7px 9px; }
-.photo-cap { font-size: 0.9375rem; color: var(--muted); }
+.photo-cap { font-size: 0.9375rem; color: var(--muted); text-align: center; }
 
 /* --- The role ------------------------------------------------------------ */
 /* The explainer sits on the hero's ground now: cyan with the band across it.
