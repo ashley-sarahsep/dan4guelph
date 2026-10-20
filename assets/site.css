@@ -14,8 +14,20 @@
   --ink-deep:   #071F27;  /* footer, the drafting band                        */
   --cyan:       #1499B8;  /* borders, accents, icon tiles, footer top rule    */
   --teal:       #0B6C85;  /* links, headings on light grounds                 */
+  /* The Donate button's cyan. It is NOT --cyan: the campaign asked for white
+     text on that button, and white on --cyan is 3.34:1, which clears AA only
+     as large text and the button is 16px. This is the same hue darkened until
+     white reaches 4.97:1, so it still reads as the campaign cyan and carries
+     white at any size. Do not use it as a heading colour - --cyan is the one
+     that pairs with dark text. */
+  --cyan-deep:  #107A93;
   --pale:       #E7F3F7;  /* tinted panels, icon tile fills, hero gradient    */
   --light-cyan: #8FD3E6;  /* footer column headings                           */
+  /* The Wellington-Dufferin Education Affiliates Committee's own yellow, for
+     the endorsement badge. 9.36:1 on --ink-deep and 11.55:1 on the black that
+     high contrast resolves it to - but only 1.82:1 on white, so this colour
+     NEVER carries text on a pale ground. Dark chip, yellow text, always. */
+  --gold:       #F2B705;
   --soft-cyan:  #CFE3EA;  /* body copy on dark                                */
   /* The campaign's red, rgb(212 35 81). Brighter than what it replaced, and
      still 5.05:1 against white, so white button text clears AA. The two
@@ -25,7 +37,18 @@
   --crimson-hi: #B81C44;  /* CTA hover, link hover on light grounds           */
   --crimson-sh: #8E1233;  /* 3px hard shadow under crimson buttons, error text */
   --page:       #F7F8F7;  /* page + alternating section background           */
-  --white:      #FFFFFF;
+  --white:      #FFFFFF;  /* literal white: text and knobs on dark grounds     */
+  /* Grounds are separate tokens from the text colours they happen to match
+     today, because a theme can invert one without the other. --surface is
+     every panel and card that reads as "white paper"; --ink-ground and
+     --teal-ground are the dark fills that carry white text. In the default
+     palette each is identical to the text token it shadows; in the Halloween
+     palette --surface goes dark while --white stays white, and --ink goes
+     near-white while --ink-ground stays dark. Use the -ground tokens for
+     backgrounds and the plain ones for text. */
+  --surface:    #FFFFFF;
+  --ink-ground: #0C2E38;
+  --teal-ground:#0B6C85;
   --hairline:   #C9CFD2;
   --muted:      #3D5560;  /* secondary copy                                   */
   --muted-2:    #4A5A61;  /* captions, fine print                             */
@@ -55,9 +78,11 @@
   --pad-y: clamp(64px, 9vw, 124px);
   --pad-x: 20px;
 
-  /* The sticky header measures 286px below 480px, 187px to 860px, 136px
-     above. A single flat offset left headings hidden behind it on phones. */
-  --anchor-offset: 150px;
+  /* Measured header height plus 22px of clearance. With scripting on,
+     site.js overwrites this with the header's real height, which is the only
+     way to get it right in every accessibility mode; these values are the
+     no-JS fallback and are measured in the default mode. */
+  --anchor-offset: 208px;   /* header 186px: pill row, scrolling nav, CTA row */
 
   --r-panel: 28px;
   /* One weight for the band's red edges and the keyline round every
@@ -71,9 +96,16 @@
   --word:  0em;
   --leading: 1.6;
 }
-/* Two values, because the header is now two heights: 128px while the nav
-   has its own row, 73px once it shares one. Re-measure before changing. */
-@media (min-width: 860px) { :root { --anchor-offset: 95px; } }
+/* Three values, because the header is three heights in the default mode: the
+   pill, the scrolling nav and the Donate button each get a row below 860px
+   (186px), then the nav and the button join the pill row but still wrap to
+   two lines until 925px (122px), then all three fit on one (73px). The upper
+   breakpoint is set at 1024 rather than 920 so a browser that wraps a little
+   later still clears; an offset larger than the header only adds gap. Order
+   matters - a media query adds no specificity, so the wider one has to come
+   second. Re-measure the header before changing any of them. */
+@media (min-width: 860px)  { :root { --anchor-offset: 144px; } }
+@media (min-width: 1024px) { :root { --anchor-offset: 95px; } }
 
 /* --- Accessibility options ----------------------------------------------- */
 /* Set as data-attributes on <html> by the panel, and re-applied from
@@ -101,11 +133,15 @@ html[data-spacing="on"] summary { margin-bottom: 0.35em; }
    Backgrounds flatten to pure white or pure black, hairlines go solid. */
 html[data-contrast="high"] {
   --ink: #000000;
+  --ink-ground: #000000;
   --ink-deep: #000000;
+  --surface: #FFFFFF;
+  --teal-ground: #00404F;
   --muted: #000000;
   --muted-2: #000000;
   --teal: #00404F;
   --cyan: #00404F;
+  --cyan-deep: #00404F;
   --pale: #FFFFFF;
   --page: #FFFFFF;
   --hairline: #000000;
@@ -124,7 +160,7 @@ html[data-contrast="high"] a { text-decoration-thickness: 3px; }
 html[data-focus="enhanced"] :focus {
   outline: 4px solid #FFFFFF !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 8px var(--ink), 0 0 0 11px #FFD400 !important;
+  box-shadow: 0 0 0 8px var(--ink-ground), 0 0 0 11px #FFD400 !important;
   border-radius: 4px;
 }
 
@@ -269,7 +305,7 @@ a:hover { color: var(--crimson-hi); }
 :focus-visible {
   outline: 3px solid #FFFFFF;
   outline-offset: 2px;
-  box-shadow: 0 0 0 6px var(--ink);
+  box-shadow: 0 0 0 6px var(--ink-ground);
   border-radius: 4px;
 }
 summary::-webkit-details-marker { display: none; }
@@ -286,7 +322,7 @@ main:focus { outline: none; }
 /* --- Layout -------------------------------------------------------------- */
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: var(--pad-y) var(--pad-x); }
 .section { scroll-margin-top: var(--anchor-offset); border-bottom: var(--bw) solid var(--hairline); }
-.section--white { background: var(--white); }
+.section--white { background: var(--surface); }
 .section--page  { background: var(--page); }
 .section--pale  { background: var(--pale); }
 /* The share block sits on the hero's cyan, at the campaign's request on
@@ -303,7 +339,7 @@ main:focus { outline: none; }
    5.09:1 becomes 1.85:1. Flip to white, exactly as the role head does. */
 html[data-contrast="high"] .section--cyan .h2,
 html[data-contrast="high"] .section--cyan .lede { color: #FFFFFF; }
-.section--dark  { background: var(--ink); color: var(--white); border-bottom-color: var(--ink); }
+.section--dark  { background: var(--ink-ground); color: var(--white); border-bottom-color: var(--ink-ground); }
 .stack { display: flex; flex-direction: column; }
 .section-head { display: flex; flex-direction: column; gap: 14px; max-width: 44em; }
 h1, h2, h3, .h2, .h2--sm, .about-h, .hero-name {
@@ -340,10 +376,21 @@ h1, h2, h3, .h2, .h2--sm, .about-h, .hero-name {
 }
 .btn--primary { background: var(--crimson); color: var(--white); box-shadow: var(--shadow-cta); }
 .btn--primary:hover { background: var(--crimson-hi); color: var(--white); }
-.btn--outline { background: var(--white); color: var(--ink); border: var(--bw) solid var(--ink); }
-.btn--outline:hover { background: var(--ink); color: var(--white); }
-.btn--dark { background: var(--ink); color: var(--white); }
-.btn--dark:hover { background: var(--teal); color: var(--white); }
+.btn--outline { background: var(--surface); color: var(--ink); border: var(--bw) solid var(--ink); }
+.btn--outline:hover { background: var(--ink-ground); color: var(--white); }
+.btn--dark { background: var(--ink-ground); color: var(--white); }
+/* Cyan, at the campaign's request, with white text since 16 Oct 2026. It
+   carried --ink-deep before that, because white on --cyan is 3.34:1 and the
+   button is 16px, where AA wants 4.5:1. Rather than shrink the ask or enlarge
+   the button, the ground moved to --cyan-deep, the same hue darkened until
+   white reaches 4.97:1. Hover goes to --ink (13.3:1) rather than --teal: at
+   6.00:1 --teal is only a shade off --cyan-deep and the hover was invisible.
+   The 3px hard shadow is --ink for the same reason - against --teal it had
+   almost nothing to show. No high-contrast override is needed now: that mode
+   resolves --cyan-deep to #00404F, where white is 11.37:1. */
+.btn--donate { background: var(--cyan-deep); color: var(--white); box-shadow: 0 3px 0 var(--ink-ground); }
+.btn--donate:hover { background: var(--ink-ground); color: var(--white); }
+.btn--dark:hover { background: var(--teal-ground); color: var(--white); }
 .btn--block { display: block; width: 100%; }
 .btn--lg { font-size: 1.125rem; padding: 16px 30px; border-radius: var(--r-card); }
 .btn--push { margin-top: auto; }
@@ -354,7 +401,7 @@ h1, h2, h3, .h2, .h2--sm, .about-h, .hero-name {
   left: 12px;
   top: -100px;
   z-index: 200;
-  background: var(--ink);
+  background: var(--ink-ground);
   color: var(--white);
   padding: 12px 18px;
   border-radius: 0 0 var(--r-ctl) var(--r-ctl);
@@ -388,18 +435,20 @@ html[data-contrast="high"] .site-header { background: #FFFFFF; }
   border-radius: var(--r-ctl); padding: 6px 14px;
 }
 .vote-pill span { width: 9px; height: 9px; background: var(--crimson); border-radius: 2px; display: block; }
-.main-nav { order: 2; flex: 1 1 auto; min-width: 0; }
-.nav-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; }
+/* The CTA is a sibling of the link list, not an item inside it, so the list
+   can scroll sideways on a phone while the button sits on its own row and
+   stays put. It is still inside <nav>, so it remains part of the Main
+   landmark and keeps its place in the tab order after the links. */
+.main-nav { order: 2; flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.nav-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; flex: 1 1 auto; min-width: 0; }
 .nav-link { display: inline-block; padding: 8px 2px; font-weight: 600; text-decoration: none; border-bottom: 3px solid transparent; }
 .nav-link:hover { border-bottom-color: var(--cyan); }
-.nav-cta { margin-left: auto; }
-.nav-list .btn { padding: 10px 20px; }
+.nav-cta { margin-left: auto; flex: none; padding: 10px 20px; }
 
 /* Below the desktop breakpoint the nav wrapped to three rows, making the sticky
    header 336px tall — over a third of a 360px phone screen. Scrolling it
    sideways in one row keeps every link reachable and gives the page back
-   ~180px. The "How to Vote" button stays pinned to the right edge so the
-   primary call to action never scrolls out of reach. Desktop is unchanged. */
+   ~180px. Desktop is unchanged. */
 @media (max-width: 859px) {
   .nav-list {
     flex-wrap: nowrap;
@@ -414,12 +463,15 @@ html[data-contrast="high"] .site-header { background: #FFFFFF; }
   /* On a phone the pill keeps its own row and the nav scrolls under it. */
   .main-nav { flex-basis: 100%; }
   .main-nav, .nav-list { min-width: 0; max-width: 100%; }
-  /* The CTA scrolls with the row rather than pinning to the right edge.
-     Pinned, it covered 205px of a 360px row and sliced through the link
-     beside it. The hero's full-width "How to Vote" button sits immediately
-     below, and the "Vote Oct 26, 2026" pill stays visible in the header,
-     so nothing is lost by letting this one scroll. */
-  .nav-cta { margin-left: 12px; }
+  /* The CTA gets a full-width row of its own UNDER the scrolling list. It
+     used to be the last item inside that list, which meant the one thing on
+     the page asking for money scrolled off the right-hand edge and a reader
+     who never swiped sideways never saw it. Pinning it to the right edge was
+     worse: it covered 205px of a 360px row and sliced through the link
+     beside it. Its own row costs the header about 56px on a phone and is
+     what the campaign asked for. */
+  .nav-list { flex-basis: 100%; }
+  .nav-cta { margin-left: 0; flex-basis: 100%; text-align: center; }
 }
 @media (max-width: 859px) and (prefers-reduced-motion: no-preference) {
   .nav-list { scroll-behavior: smooth; }
@@ -502,7 +554,7 @@ html[data-contrast="high"] .section--band::before { display: none; }
 .band--cards { height: calc(100% + 150px); transform: translateY(-50%) rotate(-3.5deg); }
 .hero-panel {
   position: relative; z-index: 1;
-  background: var(--white);
+  background: var(--surface);
   border-radius: var(--r-panel);
   padding: clamp(24px, 3vw, 42px);
   box-shadow: var(--shadow-photo);
@@ -523,6 +575,18 @@ html[data-contrast="high"] .section--band::before { display: none; }
 .hero-name { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; }
 .hero-role { font-size: clamp(1.1875rem, 2.4vw, 1.5rem); font-weight: 600; color: var(--ink); max-width: 22em; }
 .hero-tag  { font-size: clamp(1.0625rem, 2vw, 1.1875rem); color: var(--muted); max-width: 26em; }
+/* Endorsement badge. Yellow on a dark chip, the way the committee sets its own
+   name - and the only way it can be done here: --gold on the white panel is
+   1.82:1 and fails outright, while on --ink-deep it is 9.36:1. align-self
+   keeps the chip the width of its text rather than the width of the panel. */
+.endorsement {
+  align-self: start;
+  background: var(--ink-deep); color: var(--gold);
+  font-family: var(--font-head); font-weight: 700;
+  font-size: clamp(0.9375rem, 1.6vw, 1.0625rem); line-height: 1.4;
+  padding: 10px 16px; border-radius: var(--r-card);
+  max-width: 24em;
+}
 /* The tagline arrives as a short line and a sentence under it, so the first
    one carries the weight and the second explains it. Cyan, the campaign's core
    colour, at 3.34:1 on the white panel: that clears AA only as LARGE text, so
@@ -587,7 +651,7 @@ html[data-contrast="high"] .section--band::before { display: none; }
   object-position: 52% center;
   /* A small radius inside the mat; the frame carries the outer corner. */
   border-radius: 3px;
-  background: var(--white);
+  background: var(--surface);
 }
 
 /* --- Photo slots -------------------------------------------------------- */
@@ -687,7 +751,7 @@ html[data-contrast="high"] #role-h { color: #FFFFFF; }
   grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
 }
 .role-card {
-  background: var(--white); color: var(--ink);
+  background: var(--surface); color: var(--ink);
   border: var(--edge) solid var(--ink);
   border-radius: var(--r-photo);
   padding: 22px; display: flex; flex-direction: column; gap: 12px;
@@ -723,11 +787,14 @@ html[data-contrast="high"] .myth-strip .lede { color: #FFFFFF; }
 
 /* --- Platform ------------------------------------------------------------ */
 .platform-inner { max-width: var(--wrap); margin: 0 auto; padding: var(--pad-y) var(--pad-x); display: flex; flex-direction: column; gap: 32px; }
-.pillar-grid { list-style: none; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
+/* One card per row since 16 Oct 2026, when a fifth priority was added: five
+   cards in a two-up grid leaves an odd one out, and a row carries a longer
+   position without squeezing it. */
+.pillar-grid { list-style: none; padding: 0; display: grid; gap: 20px; grid-template-columns: 1fr; }
 /* The cards were --page on a --page section, so only the hairline separated
    them from the ground. White plus a resting shadow is what makes them cards. */
 .pillar {
-  background: var(--white); border: var(--bw) solid var(--hairline);
+  background: var(--surface); border: var(--bw) solid var(--hairline);
   border-radius: var(--r-photo);
   box-shadow: var(--shadow-card);
   padding: 28px; display: flex; flex-direction: column; gap: 14px;
@@ -746,13 +813,38 @@ html[data-contrast="high"] .myth-strip .lede { color: #FFFFFF; }
 .pillar p { color: var(--muted); font-size: 1.125rem; }
 .pillar-lead { font-weight: 700; color: var(--ink); font-size: 1.0625rem; }
 .pillar-body { border-top: var(--bw) solid var(--hairline); padding-top: 16px; margin-top: 2px; }
+/* MUST stay after the .pillar-body rule above. A media query adds no
+   specificity, so with this block earlier in the file the base border-top won
+   and the body picked up a top rule as well as the left one - a bracket round
+   the text rather than a divider beside it.
+
+   Full-width rows would otherwise set body copy at the wrap's whole 1120px,
+   roughly 160 characters a line. Above 860px the heading and lead take a third
+   and the body the rest, which keeps the measure near 70. */
+@media (min-width: 860px) {
+  .pillar {
+    display: grid;
+    grid-template-columns: minmax(min(260px, 100%), 1fr) 2fr;
+    /* Three rows, the third empty. The body spans all of them, and without a
+       1fr row to absorb the slack its height is shared across the rows the
+       heading and lead sit in, which floats the lead down the card. */
+    grid-template-rows: min-content min-content 1fr;
+    column-gap: 40px; row-gap: 12px;
+    align-items: start;
+  }
+  .pillar h3, .pillar-lead { grid-column: 1; }
+  .pillar-body {
+    grid-column: 2; grid-row: 1 / -1;
+    border-top: 0; padding-top: 0; margin-top: 0;
+  }
+}
 
 /* --- Disclosures --------------------------------------------------------- */
 /* Used for the procedural half of the voting section. Native <details>, so it
    works with JavaScript off; the summary is a 44px target and keeps the focus
    ring the rest of the page uses. */
 .disclosure {
-  background: var(--white); border: var(--bw) solid var(--hairline);
+  background: var(--surface); border: var(--bw) solid var(--hairline);
   border-radius: var(--r-card);
 }
 .disclosure + .disclosure { margin-top: 12px; }
@@ -777,7 +869,7 @@ html[data-motion="reduced"] .chev { transition: none; }
 /* --- Voter info ---------------------------------------------------------- */
 .voter-inner { max-width: var(--wrap); margin: 0 auto; padding: var(--pad-y) var(--pad-x); display: flex; flex-direction: column; gap: 28px; }
 .info-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
-.info-card { background: var(--white); border: var(--bw) solid var(--hairline); border-radius: var(--r-card); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.info-card { background: var(--surface); border: var(--bw) solid var(--hairline); border-radius: var(--r-card); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
 .info-card h3 { font-size: 1.25rem; font-weight: 700; }
 .info-card p { color: var(--muted); }
 .info-date { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: var(--ink); }
@@ -793,7 +885,7 @@ html[data-motion="reduced"] .chev { transition: none; }
    are not, so the section still does its job with scripting off. */
 .share-inner { max-width: var(--wrap); margin: 0 auto; padding: var(--pad-y) var(--pad-x); display: flex; flex-direction: column; gap: 28px; }
 .addr-card {
-  background: var(--white); color: var(--ink);
+  background: var(--surface); color: var(--ink);
   border: var(--bw) solid var(--hairline); border-radius: var(--r-card);
   padding: clamp(22px, 3vw, 32px); display: flex; flex-direction: column; gap: 14px;
   max-width: 44em;
@@ -809,6 +901,38 @@ html[data-motion="reduced"] .chev { transition: none; }
 .addr-status { font-weight: 700; color: var(--teal); min-height: 1.5em; }
 .js-only { display: none; }
 html.js .js-only { display: inline-block; }
+
+/* --- Endorsements -------------------------------------------------------- */
+/* The endorsement is a dark chip on a white section, the same pairing as the
+   badge in the hero: --gold is 1.82:1 on white and can NEVER carry text on a
+   pale ground, so it only ever appears on --ink-deep. On that ground it is
+   9.36:1, and high contrast resolves --ink-deep to black, where it is 11.55:1,
+   so no override is needed. Body copy inside the chip is --soft-cyan (12.82:1,
+   and white under high contrast), which is the token for exactly this job.
+   A dark CARD, not a dark section - the rule against a second dark section
+   ground still holds. */
+.endorse-inner {
+  max-width: var(--wrap); margin: 0 auto; padding: var(--pad-y) var(--pad-x);
+  display: flex; flex-direction: column; gap: 24px;
+}
+.endorse-card {
+  background: var(--ink-deep); border-radius: var(--r-card);
+  border-left: 8px solid var(--gold);
+  padding: clamp(22px, 3.2vw, 36px);
+  display: flex; flex-direction: column; gap: 12px;
+  max-width: 44em;
+}
+.endorse-label {
+  color: var(--gold); font-weight: 700; font-size: 0.9375rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.endorse-name {
+  font-family: var(--font-head); font-weight: 800; color: var(--white);
+  font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.25;
+}
+.endorse-tag { color: var(--soft-cyan); font-size: 1.0625rem; }
+.endorse-body { color: var(--muted); font-size: 1.0625rem; max-width: 44em; }
+.endorse-inner .fine { max-width: 44em; }
 
 /* --- Contact ------------------------------------------------------------- */
 .contact-inner {
@@ -851,14 +975,14 @@ html.js .js-only { display: inline-block; }
   display: block; width: 100%; height: auto;
   max-height: 72vh; object-fit: contain;
   border-radius: calc(var(--r-photo) - 10px);
-  background: var(--white);
+  background: var(--surface);
 }
 /* The caption sits on its own white strip rather than on the mat. White on
    --cyan is 3.34:1, and ink on it is 5.09:1 in the normal palette but black on
    #00404F under high contrast, which fails. On white both modes are safe. */
 .lightbox__cap {
   color: var(--ink); font-weight: 600; font-size: 0.9375rem;
-  background: var(--white); border-radius: calc(var(--r-photo) - 14px);
+  background: var(--surface); border-radius: calc(var(--r-photo) - 14px);
   padding: 10px 14px; margin: 0;
 }
 .lightbox__close { align-self: flex-start; margin: 0 6px 6px; }
@@ -884,14 +1008,14 @@ html.js .a11y { display: block; }
 .a11y__fab {
   position: fixed; right: 16px; bottom: 16px; z-index: 150;
   display: flex; align-items: center; gap: 10px;
-  background: var(--ink); color: var(--white);
+  background: var(--ink-ground); color: var(--white);
   border: var(--bw) solid var(--white);
   border-radius: 999px; padding: 12px 20px;
   font-weight: 700; font-size: 1rem; min-height: 52px;
   box-shadow: 0 4px 16px rgba(7, 31, 39, 0.35);
   cursor: pointer;
 }
-.a11y__fab:hover { background: var(--teal); }
+.a11y__fab:hover { background: var(--teal-ground); }
 .a11y__fab-icon { font-size: 1.375rem; line-height: 1; }
 @media (max-width: 420px) { .a11y__fab-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } .a11y__fab { padding: 12px; } }
 
@@ -901,23 +1025,23 @@ html.js .a11y { display: block; }
   right: 16px; bottom: 16px; left: 16px;
   max-width: 420px; margin-left: auto;
   max-height: calc(100vh - 32px); overflow-y: auto;
-  background: var(--white); color: var(--ink);
+  background: var(--surface); color: var(--ink);
   border: var(--bw) solid var(--ink); border-radius: var(--r-card);
   box-shadow: 0 12px 40px rgba(7, 31, 39, 0.4);
   display: flex; flex-direction: column;
 }
-.a11y__head { position: sticky; top: 0; z-index: 1; background: var(--white);
+.a11y__head { position: sticky; top: 0; z-index: 1; background: var(--surface);
   padding: 22px 56px 16px 22px; border-bottom: var(--bw) solid var(--hairline); }
 .a11y__head h2 { font-size: 1.375rem; font-weight: 800; }
 .a11y__head p { color: var(--muted); font-size: 0.9375rem; margin-top: 4px; }
 .a11y__close {
   position: absolute; top: 14px; right: 14px;
   width: 44px; height: 44px; display: grid; place-items: center;
-  background: var(--white); color: var(--ink);
+  background: var(--surface); color: var(--ink);
   border: var(--bw) solid var(--ink); border-radius: var(--r-ctl);
   font-size: 1.25rem; line-height: 1; cursor: pointer;
 }
-.a11y__close:hover { background: var(--ink); color: var(--white); }
+.a11y__close:hover { background: var(--ink-ground); color: var(--white); }
 .a11y__body { padding: 6px 22px 12px; }
 .a11y__group { border: 0; margin: 0; padding: 16px 0 4px; }
 .a11y__group + .a11y__group { border-top: 1px solid var(--hairline); }
@@ -935,7 +1059,7 @@ html.js .a11y { display: block; }
   appearance: none; -webkit-appearance: none;
   flex: none; position: relative; margin: 2px 0 0;
   width: 56px; height: 32px; border-radius: 999px;
-  background: var(--white); border: var(--bw) solid var(--ink);
+  background: var(--surface); border: var(--bw) solid var(--ink);
   cursor: pointer; transition: background 150ms;
 }
 .a11y__cb::after {
@@ -943,8 +1067,8 @@ html.js .a11y { display: block; }
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--ink); transition: transform 150ms;
 }
-.a11y__cb:checked { background: var(--teal); border-color: var(--teal); }
-.a11y__cb:checked::after { background: var(--white); transform: translateX(24px); }
+.a11y__cb:checked { background: var(--teal-ground); border-color: var(--teal-ground); }
+.a11y__cb:checked::after { background: var(--surface); transform: translateX(24px); }
 .a11y__cb:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .a11y__foot { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 22px 4px; border-top: var(--bw) solid var(--hairline); padding-top: 16px; }
