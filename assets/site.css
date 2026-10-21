@@ -607,7 +607,13 @@ html[data-contrast="high"] .section--band::before { display: none; }
   text-decoration: none;
   display: inline-block;
 }
-.endorsement:hover { background: var(--teal-ground); color: var(--white); }
+/* Hover goes to the brand cyan, not darker, at the campaign's request on
+   21 Oct 2026 - it used to fill with --teal-ground and read as the same
+   darkening move the Donate button makes. White on --cyan is 3.34:1, which
+   needs the text to be large: this badge is 24px at its smallest and 800
+   throughout, so it is past the 24px threshold on size alone. High contrast
+   resolves --cyan to #00404F, white at 11.37:1. */
+.endorsement:hover { background: var(--cyan); color: var(--white); }
 /* The tagline arrives as a short line and a sentence under it, so the first
    one carries the weight and the second explains it. Cyan, the campaign's core
    colour, at 3.34:1 on the white panel: that clears AA only as LARGE text, so
