@@ -648,6 +648,12 @@ html[data-contrast="high"] .section--band::before { display: none; }
   padding: 10px;
   border-radius: var(--r-photo);
   box-shadow: var(--shadow-photo);
+  /* Positioned so the Halloween costume button can sit over the hero
+     picture. Nothing else is absolutely positioned inside a frame, so this
+     changes no layout on its own - and it lives here, in the base rules,
+     rather than inside the seasonal block, because an ancestor that is only
+     positioned under one skin breaks the moment the skin comes off. */
+  position: relative;
 }
 .photo-frame img {
   display: block; width: 100%; height: auto;
@@ -1058,6 +1064,319 @@ html[data-motion="reduced"] .photo-zoom img { transition: none; }
 .footer-legal { border-top: 1px solid #24505E; padding-top: 20px; font-size: 0.9375rem; }
 
 /* --- Decorative glyphs --------------------------------------------------- */
+
+/* --- Season: Halloween ---------------------------------------------------- */
+/* A skin the reader turns on from the floating button, not a date switch.
+   Everything below is tokens plus a short list of rules where a colour was
+   hard-coded or where a token is used as a ground rather than as text. The
+   markup does not change at all.
+
+   The whole block is guarded by :not([data-contrast="high"]). High contrast
+   exists to flatten the page to one pure pairing, and a seasonal skin must
+   never win over an accessibility setting. The guard does that by source
+   order rather than by hoping - turn both on and the page is plain high
+   contrast, no pumpkin, no webs.
+
+   Colours are the campaign's chosen Halloween palette: #FF7518 pumpkin,
+   #FFA500 orange, #9400D3 and #6A0DAD and #8A2BE2 violet, #1C1C1C raisin
+   black. The two surfaces either side of --page are derived from them rather
+   than taken from the sheet, because the palette has no mid-dark neutral. */
+html[data-season="halloween"]:not([data-contrast="high"]) {
+  --ink:         #F7F2E8;  /* candlelight, the body text                      */
+  --ink-ground:  #1A1226;  /* dark buttons, the skip link, the focus shadow   */
+  --ink-deep:    #0D0A14;  /* footer, the band, the endorsement card          */
+  --surface:     #262134;  /* cards and the white sections                    */
+  --page:        #1C1C1C;  /* page + alternating sections                     */
+  --muted:       #D4C8B8;
+  --muted-2:     #C3B6A4;
+  --cyan:        #FF7518;  /* pumpkin: accent headings AND the lit grounds    */
+  --cyan-deep:   #8A2BE2;  /* the Donate button, white text at 5.96:1         */
+  --teal:        #FFA500;  /* links and small headings, 8.63:1 on --page      */
+  --teal-ground: #6A0DAD;  /* hover fills that carry white text               */
+  --pale:        #2C2338;
+  --light-cyan:  #C9A0FF;
+  --soft-cyan:   #E6DBCB;
+  --crimson:     #9400D3;
+  --crimson-hi:  #6A0DAD;
+  --crimson-sh:  #3D0070;
+  --hairline:    #635A78;
+  --error-bg:    #3A1620;
+}
+/* --cyan is the one token that is a ground AND a text colour, and it survives
+   the inversion because pumpkin is light: 6.34:1 as a heading on --page, and
+   7.29:1 the other way up under --ink-deep on the hero, role and share
+   grounds. Those three heads keep their --ink-deep and need no override here,
+   which is the whole reason the ground colour had to stay light. */
+
+/* The header is a hard-coded translucent white, so it needs saying again. */
+html[data-season="halloween"]:not([data-contrast="high"]) .site-header {
+  background: rgba(22, 18, 30, 0.94);
+}
+/* Link hover is --crimson-hi, a deep violet here, which would vanish into the
+   page. Links brighten to pumpkin instead - the same move the footer already
+   makes on its dark ground. */
+/* Text links only. A button that happens to be an <a> carries its own hover
+   colour, and this rule outspecifies every one of them - which turned the
+   Donate button's label, the endorsement badge's and the primary CTA's to
+   pumpkin on their own hover fills, as low as 2.22:1. Excluding them here
+   fixes all three in one place and keeps any button added later safe.
+   Found by measuring hover states directly; axe never visits them. */
+html[data-season="halloween"]:not([data-contrast="high"]) a:not(.btn):not(.endorsement):hover {
+  color: var(--cyan);
+}
+html[data-season="halloween"]:not([data-contrast="high"]) .footer-legal { border-top-color: #4A3B63; }
+
+/* The endorsement panel is pumpkin under this skin, because it is painted
+   with --cyan. White on #FF7518 is 2.68:1 and fails even as large text, so
+   the panel's text flips to --ink-deep - the same move the trustee
+   explainer's head and lede already make on this ground, and the reason
+   --cyan is required to stay light. Measured at 7.29:1.
+   Caught by running axe with the skin on, which the panel had not been. */
+html[data-season="halloween"]:not([data-contrast="high"]) .endorse-panel {
+  color: var(--ink-deep);
+}
+
+/* The Donate button keeps the violet here. It follows --cyan on the regular
+   site, which is the campaign's brand colour - but --cyan is pumpkin under
+   this skin, and white on #FF7518 is 2.69:1, a plain fail at any size. It
+   would also give the button the same colour as every heading on the page.
+   --cyan-deep is the violet in this palette and carries white at 5.96:1,
+   which is what this token exists for. */
+/* The Donate button and the endorsement badge both land on --cyan in the
+   default palette, which is pumpkin here - white on #FF7518 is 2.69:1. Both
+   take the violet instead, white at 5.96:1.
+   The button's hover needs its own line: this selector outspecifies
+   .btn--donate:hover, so without it the button kept the violet on hover and
+   had no hover feedback at all under the skin. */
+html[data-season="halloween"]:not([data-contrast="high"]) .btn--donate,
+html[data-season="halloween"]:not([data-contrast="high"]) .endorsement:hover {
+  background: var(--cyan-deep);
+}
+html[data-season="halloween"]:not([data-contrast="high"]) .btn--donate:hover {
+  background: var(--ink-ground);
+}
+
+/* Cobwebs. Two corner webs on the lit grounds - the hero and the trustee
+   explainer share .section--band, so one rule hangs them in both - and one in
+   the footer. They are background images on a pseudo-element, so they are
+   decorative by construction: no markup, nothing in the accessibility tree,
+   nothing to read out. z-index 0 keeps them under everything that carries
+   content, the same level the cross-hatch sits at, and the section's own
+   overflow:hidden trims them to the corner. */
+html[data-season="halloween"]:not([data-contrast="high"]) .section--band::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' width='160' height='160'%3E%3Cpath d='M0 0L238.2 29.2M0 0L224.1 86.0M0 0L194.2 141.1M0 0L151.0 186.5M0 0L97.6 219.3M0 0L37.5 237.0M37.7 4.6Q29.5 7.4 35.5 13.6Q26.7 14.5 30.7 22.3Q22.1 20.9 23.9 29.5Q15.9 25.9 15.5 34.7Q8.6 29.1 5.9 37.5M65.5 8.0Q51.2 12.8 61.6 23.7Q46.4 25.2 53.4 38.8Q38.3 36.3 41.5 51.3Q27.6 45.0 26.8 60.3Q15.0 50.6 10.3 65.2M95.3 11.7Q74.5 18.6 89.6 34.4Q67.5 36.6 77.7 56.4Q55.7 52.9 60.4 74.6Q40.1 65.5 39.0 87.7Q21.8 73.6 15.0 94.8M127.0 15.6Q99.4 24.8 119.5 45.9Q90.0 48.9 103.6 75.2Q74.3 70.5 80.6 99.5Q53.5 87.3 52.1 116.9Q29.1 98.2 20.0 126.4M158.8 19.5Q124.2 31.0 149.4 57.3Q112.5 61.1 129.4 94.0Q92.8 88.1 100.7 124.3Q66.9 109.1 65.1 146.2Q36.4 122.7 25.0 158.0' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' width='160' height='160'%3E%3Cg transform='translate(160,0) scale(-1,1)'%3E%3Cpath d='M0 0L238.2 29.2M0 0L224.1 86.0M0 0L194.2 141.1M0 0L151.0 186.5M0 0L97.6 219.3M0 0L37.5 237.0M37.7 4.6Q29.5 7.4 35.5 13.6Q26.7 14.5 30.7 22.3Q22.1 20.9 23.9 29.5Q15.9 25.9 15.5 34.7Q8.6 29.1 5.9 37.5M65.5 8.0Q51.2 12.8 61.6 23.7Q46.4 25.2 53.4 38.8Q38.3 36.3 41.5 51.3Q27.6 45.0 26.8 60.3Q15.0 50.6 10.3 65.2M95.3 11.7Q74.5 18.6 89.6 34.4Q67.5 36.6 77.7 56.4Q55.7 52.9 60.4 74.6Q40.1 65.5 39.0 87.7Q21.8 73.6 15.0 94.8M127.0 15.6Q99.4 24.8 119.5 45.9Q90.0 48.9 103.6 75.2Q74.3 70.5 80.6 99.5Q53.5 87.3 52.1 116.9Q29.1 98.2 20.0 126.4M158.8 19.5Q124.2 31.0 149.4 57.3Q112.5 61.1 129.4 94.0Q92.8 88.1 100.7 124.3Q66.9 109.1 65.1 146.2Q36.4 122.7 25.0 158.0' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: left top, right top;
+  background-size: clamp(110px, 16vw, 190px) auto, clamp(110px, 16vw, 190px) auto;
+}
+html[data-season="halloween"]:not([data-contrast="high"]) .site-footer { position: relative; }
+html[data-season="halloween"]:not([data-contrast="high"]) .site-footer::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' width='160' height='160'%3E%3Cg transform='translate(160,0) scale(-1,1)'%3E%3Cpath d='M0 0L238.2 29.2M0 0L224.1 86.0M0 0L194.2 141.1M0 0L151.0 186.5M0 0L97.6 219.3M0 0L37.5 237.0M37.7 4.6Q29.5 7.4 35.5 13.6Q26.7 14.5 30.7 22.3Q22.1 20.9 23.9 29.5Q15.9 25.9 15.5 34.7Q8.6 29.1 5.9 37.5M65.5 8.0Q51.2 12.8 61.6 23.7Q46.4 25.2 53.4 38.8Q38.3 36.3 41.5 51.3Q27.6 45.0 26.8 60.3Q15.0 50.6 10.3 65.2M95.3 11.7Q74.5 18.6 89.6 34.4Q67.5 36.6 77.7 56.4Q55.7 52.9 60.4 74.6Q40.1 65.5 39.0 87.7Q21.8 73.6 15.0 94.8M127.0 15.6Q99.4 24.8 119.5 45.9Q90.0 48.9 103.6 75.2Q74.3 70.5 80.6 99.5Q53.5 87.3 52.1 116.9Q29.1 98.2 20.0 126.4M158.8 19.5Q124.2 31.0 149.4 57.3Q112.5 61.1 129.4 94.0Q92.8 88.1 100.7 124.3Q66.9 109.1 65.1 146.2Q36.4 122.7 25.0 158.0' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: clamp(120px, 18vw, 210px) auto;
+}
+html[data-season="halloween"]:not([data-contrast="high"]) .footer-inner { position: relative; }
+
+/* --- Halloween easter eggs ------------------------------------------------ */
+/* Three of them, all built by the script and all removed again when the skin
+   goes off: a spider that drops from the hero's right-hand cobweb, a pumpkin
+   hidden in the footer, and three bats that cross the hero once on the press
+   that turns the skin on.
+
+   Everything here is guarded the same way the skin is. A reader in high
+   contrast gets no eggs at all - that mode is for seeing the page, not for
+   finding things in it - and the guard means the script can create them
+   without having to watch the contrast attribute itself. */
+html[data-contrast="high"] .hw-spider,
+html[data-contrast="high"] .hw-pumpkin { display: none; }
+
+/* The costume gallery's button, laid over the hero photograph.
+   Deliberately NOT guarded with :not([data-contrast="high"]) like the rest of
+   this block. The seasonal rules are decoration and high contrast is entitled
+   to flatten them; this one is a control, and a control that loses its styling
+   in an accessibility mode is a control nobody can see. It keeps the same
+   shape in both and only its colours change.
+   The frame is given position:relative in the base stylesheet rather than
+   here, because a positioned ancestor that only exists under one skin is the
+   kind of thing that works until somebody turns the skin off. */
+.hw-shuffle {
+  position: absolute; inset: 0; z-index: 2;
+  background: none; border: 0; padding: 0; font: inherit;
+  border-radius: var(--r-photo);
+  cursor: pointer;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+/* The cue sits in the bottom of the picture and only comes up on hover or
+   focus, so the photograph is a photograph until you go near it. Its own
+   dark ground, because it has to carry white over whatever the costume
+   underneath happens to be - 14.35:1 on --ink-ground, and it is the one
+   thing here that cannot be checked against a known background. */
+.hw-shuffle__hint {
+  margin-bottom: 18px;
+  background: var(--ink-ground); color: var(--white);
+  font-family: var(--font-head); font-weight: 700; font-size: 1rem;
+  padding: 8px 16px; border-radius: var(--r-ctl);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 160ms, transform 160ms;
+}
+.hw-shuffle:hover .hw-shuffle__hint,
+.hw-shuffle:focus-visible .hw-shuffle__hint { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hw-shuffle__hint { transition: none; }
+}
+html[data-motion="reduced"] .hw-shuffle__hint { transition: none; }
+
+/* The heads.
+   One fixed layer with pointer-events off: it paints over the page and can
+   never cover a link, move anything or widen the document. Under the two
+   floating buttons at 150 on purpose - they stay pressable while it rains.
+   The layer is aria-hidden in the markup, so nothing here carries meaning. */
+.hw-heads {
+  position: fixed; inset: 0; z-index: 140;
+  pointer-events: none; overflow: hidden;
+}
+.hw-head {
+  position: absolute; top: 0; height: auto;
+  will-change: transform;
+  animation: hw-fall linear forwards;
+}
+@keyframes hw-fall {
+  from { transform: translate3d(0, -28vh, 0) rotate(0deg); }
+  to   { transform: translate3d(0, 118vh, 0) rotate(var(--spin, 180deg)); }
+}
+/* Reduced motion keeps the joke and loses the fall: the heads come up where
+   they already are and fade out again. The script positions them down the
+   page for this case rather than stacking them all at the top. */
+.hw-heads.is-still .hw-head {
+  animation: hw-blink 2.2s ease-in-out forwards;
+}
+@keyframes hw-blink {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* The spider.
+   Rather than move the spider, the thread above it grows and pushes it down,
+   which keeps the silk attached to the web without any transform arithmetic.
+   It hangs inside the hero's right-hand web and the section's own
+   overflow:hidden trims the thread at the top. z-index 0 is the same level as
+   the webs and the drafting band, so it can never cross the copy; there is no
+   content in that corner for it to need to. */
+.hw-spider {
+  /* It is a <button>, so the browser's own chrome has to come off. */
+  background: none; border: 0; padding: 0; font: inherit;
+  position: absolute; top: 0; z-index: 0;
+  /* The silhouettes are drawn in currentColor, and --ink is near-white under
+     this skin, so both the spider and the bats come out ghost-white on the
+     pumpkin unless they are told otherwise. Caught in a screenshot, not in
+     the markup. */
+  color: var(--ink-ground);
+  right: clamp(30px, 5.4vw, 68px);
+  width: clamp(26px, 3.4vw, 38px);
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+}
+.hw-spider__thread {
+  width: 2px; height: clamp(34px, 6vw, 62px);
+  background: rgba(255, 255, 255, 0.55);
+  transition: height 760ms cubic-bezier(0.33, 1.2, 0.52, 1);
+}
+.hw-spider:hover .hw-spider__thread,
+.hw-spider.is-down .hw-spider__thread { height: clamp(120px, 17vw, 210px); }
+.hw-spider svg { display: block; width: 100%; height: auto; }
+/* No drop for a reader who asked for less motion. The global reduced-motion
+   rule only shortens the transition, which would make the spider teleport;
+   this stops it moving at all. */
+@media (prefers-reduced-motion: reduce) {
+  .hw-spider:hover .hw-spider__thread,
+  .hw-spider.is-down .hw-spider__thread { height: clamp(34px, 6vw, 62px); }
+}
+html[data-motion="reduced"] .hw-spider:hover .hw-spider__thread,
+html[data-motion="reduced"] .hw-spider.is-down .hw-spider__thread { height: clamp(34px, 6vw, 62px); }
+
+/* The hidden pumpkin. A real button, because it opens something: it takes a
+   focus ring, a 44px target and a name a screen reader can read out.
+   It sits at the TOP right of the footer, tucked into the footer's cobweb.
+   **Not the bottom corners**: both of those belong to fixed floating buttons,
+   the accessibility one right and the season one left, and a pumpkin down
+   there is covered by them and cannot be pressed at all. Found by a click
+   test, not by looking - the button was plainly visible the whole time. */
+.hw-pumpkin {
+  position: absolute; right: 10px; top: 4px; z-index: 2;
+  width: 44px; height: 44px; padding: 7px;
+  background: transparent; border: 0; cursor: pointer;
+  opacity: 0.62; transition: opacity 160ms, transform 160ms;
+}
+.hw-pumpkin:hover, .hw-pumpkin:focus-visible { opacity: 1; transform: scale(1.12); }
+.hw-pumpkin svg { display: block; width: 100%; height: auto; }
+
+/* What it opens. A native <dialog> for the same reasons the lightbox is one:
+   showModal() brings the focus trap, Escape and the top layer with it. */
+.hw-found { border: 0; padding: 0; background: transparent; max-width: min(92vw, 420px); }
+.hw-found::backdrop { background: rgba(7, 31, 39, 0.82); }
+.hw-found__inner {
+  background: var(--surface); color: var(--ink);
+  border: var(--edge) solid var(--cyan); border-radius: var(--r-photo);
+  padding: clamp(22px, 4vw, 30px);
+  display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
+}
+.hw-found__art { width: 56px; height: 56px; }
+.hw-found h2 { font-size: 1.375rem; font-weight: 800; color: var(--cyan); }
+.hw-found p { color: var(--muted); }
+.hw-found__next { border-top: 2px solid var(--hairline); padding-top: 14px; }
+
+/* --- The season switch ---------------------------------------------------- */
+/* Bottom left, mirroring the accessibility button bottom right, and built by
+   the script for the same reason that one is: with scripting off it would do
+   nothing, so it is not there. The label says what the next press does, which
+   is why there is no aria-pressed on it - a toggle that also renames itself
+   announces its state twice and contradicts itself half the time. */
+/* Orange on black on the regular site, at the campaign's request on 16 Oct
+   2026: the page is otherwise cyan and white, and this is meant to be found.
+   The two colours are literals rather than tokens because they belong to the
+   Halloween palette, not the campaign's - pulling them into :root would put a
+   pumpkin in the brand set for the sake of one button. Pumpkin on near-black
+   is 6.85:1 and the hover inverts to the same 6.85:1, both clear of AA at the
+   button's 16px. */
+.season-fab {
+  position: fixed; left: 16px; bottom: 16px; z-index: 150;
+  background: #141414; color: #FF7518;
+  border: var(--bw) solid #FF7518;
+  border-radius: 999px; padding: 12px 18px;
+  font-weight: 700; font-size: 1rem; min-height: 52px;
+  box-shadow: 0 4px 16px rgba(7, 31, 39, 0.35);
+  cursor: pointer;
+}
+.season-fab:hover { background: #FF7518; color: #141414; }
+/* High contrast flattens it like everything else. Orange on black is legible
+   enough on its own, but that mode exists to remove the choice. */
+html[data-contrast="high"] .season-fab {
+  background: #000000; color: #FFFFFF; border-color: #FFFFFF;
+}
+html[data-contrast="high"] .season-fab:hover {
+  background: #FFFFFF; color: #000000; border-color: #000000;
+}
+/* Once the skin is on, the orange has a whole page of its own and the button
+   steps back to the violet. The text has to go white with it: pumpkin on
+   --crimson is 2.44:1. */
+html[data-season="halloween"]:not([data-contrast="high"]) .season-fab {
+  background: var(--crimson); color: var(--white); border-color: var(--white);
+}
+html[data-season="halloween"]:not([data-contrast="high"]) .season-fab:hover {
+  background: var(--crimson-hi); color: var(--white);
+}
+/* Two pills on one 360px row is 310px of 328px available, so they fit, but
+   only just - shorten a label before adding a third. */
+@media (max-width: 420px) {
+  .season-fab { font-size: 0.9375rem; padding: 12px 14px; }
+}
 
 /* --- Accessibility panel -------------------------------------------------- */
 /* Hidden entirely without JS — the controls would do nothing. */
